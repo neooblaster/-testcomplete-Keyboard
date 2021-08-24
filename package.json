@@ -1,0 +1,17 @@
+{
+    "name": "@testcomplete/keyboard",
+    "version": "0.3.0",
+    "description": "An interface to perform Keyboard (and some Mouse) actions in an easier way",
+    "main": "Keyboard.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+    },
+    "keywords": [
+        "TestComplete",
+        "Automatition",
+        "Keyboard",
+        "Interface"
+    ],
+    "author": "Nicolas DUPRE",
+    "license": "ISC"
+}
