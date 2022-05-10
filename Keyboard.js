@@ -1,5 +1,7 @@
 ﻿/**
- * Version v0.3.0
+ * Version v0.6.0
+ *
+ * @Author: Nicolas DUPRE (VISEO)
  *
  * Keyboard Interface to simplify manipulation with controls keys while
  * handling delay between input sequence
@@ -29,6 +31,33 @@ function Keyboard() {
      * @private
      */
     self._delay    = 100;
+
+    /**
+     * @type {boolean}  Indicates if we have to perform RefreshMappingInfo before
+     *                  executing sequence.
+     * @private
+     */
+    self._autorefresh = true;
+
+    /**
+     * @type {boolean}  Methods Keys will automatically clear the fill before entering text.
+     *
+     * @private
+     */
+    self._keysautoclear = true;
+
+    /**
+     * @type {number} Maximum time (in ms) to wait when we acquiring TC Object.
+     * @private
+     */
+   // self._timeout = 30000;
+    self._timeout = 120000;
+
+    /**
+     * @type {number} Time in ms between to retry for acquiring TC Object.
+     * @private
+     */
+    self._interval = 250;
 
     /**
      * Set TestComplete object which has method Keys() to received recorded sequence.
@@ -66,12 +95,25 @@ function Keyboard() {
      * @return {Keyboard}
      */
     self.send = function ($bClearSequence = true) {
+        // Next to the new method 'function()',
+        // We can have nested Keyboard calls (in callbacks).
+        // addRecord() will complete self._sequence by append while
+        // we are currently executing sequence.
+        // So we picked sequence (consumed) to left an empty sequence
+        // for nested Keyboard.x().run();
+        //
+        // Sequence will be recovered at the end of the execution
+        // if $bClearSequence is set to false
+        let oSequence = self._sequence;
+        self._sequence = [];
+
         // Run Sequences
-        self._sequence.map(function ($oSequence) {
+        oSequence.forEach(function ($oSequence, $nIdx) {
             // Is the sequence Method is a custom function ?
             if (/^\./.test($oSequence.method)) {
                 self.customs(
                     $oSequence.receiver,
+                    $oSequence.caller,
                     $oSequence.method,
                     $oSequence.keys,
                     $oSequence.delay,
@@ -80,8 +122,11 @@ function Keyboard() {
 
                 return self;
             }
+            // Autorefresh and wait until object is found with max timeout
+            $oSequence.receiver = self.waitingFor($oSequence.receiver);
 
             // From this point, we are working with TC Functions
+            // @TODO : !== ???
             if ($oSequence.receiver) {
                 if (typeof $oSequence.Keys === 'function') {
                     Log.error('Keyboard Error :: Defined TestComplete object with on() do not have method Keys().');
@@ -96,7 +141,7 @@ function Keyboard() {
             // can be Disabled before turning to Enabled
             // To prevent developper to set manually a delay
             // We will perform test before considering it as really Disabled
-            let nAttemps = 5;
+            let nAttemps = 10;
             let bCanRun  = true;
 
             if ($oSequence.reqEnabled) {
@@ -124,7 +169,7 @@ function Keyboard() {
                 } else {
                     // Check if methods is Keys()
                     if ($oSequence.method === 'Keys') {
-                        Log.Warning(`You requested "Keys()" method on "${$oSequence.receiver.MappedName}" but sequence is empty. It can be as you expected when you have to enter en blank value.`);
+                        //Log.Warning(`You requested "Keys()" method on "${$oSequence.receiver.MappedName}" but sequence is empty. It can be as you expected when you have to enter en blank value.`);
                         $oSequence.receiver[$oSequence.method]($oSequence.keys);
                     } else {
                         $oSequence.receiver[$oSequence.method]();
@@ -137,9 +182,10 @@ function Keyboard() {
             }
         });
 
-        // Refresh Sequence log
-        if ($bClearSequence) {
-            self._sequence = [];
+        // If we do not refresh sequence
+        // Restore picked sequence
+        if (!$bClearSequence) {
+            self._sequence = oSequence;
         }
 
         return self;
@@ -159,18 +205,35 @@ function Keyboard() {
     /**
      * Append request sequence record in the buffer.
      *
-     * @param {String}  $sMethod     TC Object Method to call
+     * @param {String}  $sSelfMethod     Keyboard Caller Methode
+     * @param {String}  $sCallMethod     TC Object Method to call
      * @param {String}  $sRecord     New sequence
      * @param {Number}  $nDelayMs    Delay to wait next to the Keys execution
      * @param {Boolean} $bReqEnabled Indicates if the Enabled check must be performed
      * @param {Array}   $aArgs       Extra arguments (rest) for customs functions
+     *
+     * @return {Keyboard}
      */
-    self.addRecord = function($sMethod, $sRecord, $nDelayMs = null, $bReqEnabled, $aArgs) {
+    self.addRecord = function($sSelfMethod, $sCallMethod, $sRecord, $nDelayMs = null, $bReqEnabled, $aArgs) {
         let nDelay = ($nDelayMs) ? $nDelayMs : self._delay;
+
+        // Specific Rule for Native TC Method "Keys()"
+        // We want to add "CTRL+A, BackSpace", to clear fields before input.
+        if ($sSelfMethod === 'keys' && self._keysautoclear) {
+            self._sequence.push({
+                receiver: self._receiver,
+                caller: $sSelfMethod,
+                method: $sCallMethod,
+                keys: '^a[BS]',
+                delay: self._delay,
+                reqEnabled: $bReqEnabled,
+                args: $aArgs
+            });
+        }
 
         self._sequence.push({
             receiver: self._receiver,
-            method: $sMethod,
+            method: $sCallMethod,
             keys: $sRecord,
             delay: parseInt(nDelay),
             reqEnabled: $bReqEnabled,
@@ -178,6 +241,83 @@ function Keyboard() {
         });
 
         return self;
+    };
+
+    /**
+     * Define the maximum time for acquiring TC Object.
+     * Timeout is set by defaut to 30seconds.
+     *
+     * @param $nTimeoutMs  Delay in ms for Auto waiting.
+     */
+    self.timeout = function ($nTimeoutMs = 30000) {
+       self._timeout = $nTimeoutMs;
+    };
+
+    /**
+     * Define the delay interval between 2 retry of acquiring TC Object.
+     *
+     * @param {Number} $nIntervalMs Delay between to retry.
+     */
+    self.interval = function ($nIntervalMs = 250) {
+        self._interval = $nIntervalMs;
+    };
+
+    /**
+     * Acquiring the TestComplete object with wait until object is found (or timeout reached).
+     *
+     * @param {Object} $oObject Object to acquire.
+     *
+     * @return {{Exists}|*}
+     */
+    self.waitingFor = function ($oObject) {
+        let nProjectTimeout = Options.Run.Timeout;
+        let nStartTime = new Date();
+        let nStepDate = new Date();
+
+        if ($oObject) {
+            if(self._autorefresh) {
+                Options.Run.Timeout = self._interval;
+
+                do {
+                    nStepDate = new Date();
+                    let nRemainingTime = (self._timeout/1000) - Math.round((nStepDate - nStartTime) / 1000);
+                    try {
+                        // Switch to micro time delay for acquiring object
+                        $oObject.RefreshMappingInfo();
+                    } catch (err) {
+
+                    }
+                    Indicator.PushText(`Timeout in ${nRemainingTime} seconds.`);
+                } while(!$oObject.Exists && ((nStepDate - nStartTime) < self._timeout))
+
+                if ($oObject.Exists) {
+                    // Revert back to project setting
+                    Options.Run.Timeout = nProjectTimeout;
+                    Indicator.PushText(`Object found. Performing actions.`);
+                } else {
+                    // Revert back to project setting
+                    Options.Run.Timeout = nProjectTimeout;
+                    Indicator.PushText(`Object not found. Raising Error.`);
+                    Log.Error(`Unable to find object in the expected time.`);
+                }
+            }
+        }
+
+        return $oObject;
+    };
+
+    /**
+     * Return the property value of object set with .on()
+     *
+     * @param {String} $sProperty   Object property to retrieve.
+     * @param {Object} $oObject     [Optional] Object to process.
+     *
+     * @return {*}
+     */
+    self.get = function ($sProperty, $oObject = null) {
+        let oObject = $oObject || self._receiver;
+        oObject = self.waitingFor(oObject);
+        return oObject[$sProperty];
     };
 
     /**
@@ -192,22 +332,81 @@ function Keyboard() {
      * @param {Number} $nDelay      Delays in ms
      * @param {Array}  $aArgs       All others arguments passed in method "Keyboard.<custFunction>(delay, x,y,z)
      *
-     * @return {{Delay: Delay}}
+     * @return {{Refresh: Refresh, Delay: Delay}}
      */
-    self.customs = function ($oReceiver, $sMethod, $sRecord, $nDelay, $aArgs) {
+    self.customs = function ($oReceiver, $sCaller, $sMethod, $sRecord, $nDelay, $aArgs) {
         return {
+            /**
+             * Executes TC Statement Delay.
+             */
             Delay: function () {
                 Delay($nDelay);
+            },
+
+            /**
+             * Executes TC Method RefreshMappingInfo on TC Object if
+             * auto refresh is disabled.
+             */
+            Refresh: function () {
+                self.waitingFor($oReceiver);
+            },
+
+            /**
+             * Turn On/Off autorefresh before performing any action on TC Object.
+             * Mainly designed for Web pages where elements can be updated.
+             * This function do not need $nDelay, so considering the boolean is provided
+             * in $nDelay to have this statement :
+             *
+             *  .autorefresh(true) insteand of .autorefresh(0, true)
+             *
+             * @return {Keyboard}
+             */
+            AutoRefresh: function () {
+                let nBoolean = ($aArgs[0]) ? true : false;
+
+                self._autorefresh = nBoolean;
+            },
+
+            /**
+             * Executes the provided function in the first argument. The rest
+             * is passed to the function.
+             *
+             * @return {Keyboard}
+             */
+            Function: function () {
+                // Use var to left intact $aArgs
+                let aArgs = $aArgs;
+
+                // First argument = function
+                aArgs.shift().apply(this, aArgs);
+
+                // Perform provided delay
+                Delay($nDelay);
+
+                return self;
             }
         }
     };
 
+    /**
+     * Turn on/off the auto clear of field before typing the keys.
+     *
+     * @param {Boolean} $bEnabled
+     *
+     * @return {Keyboard}
+     */
+    self.keysautoclear = function ($bEnabled = false) {
+        self._keysautoclear = $bEnabled;
+
+        return self;
+    }
+
     //  Generates function for direct Keyboard Controls
     // ------------------------------------------------------------------------
     let oDirectInput = {
-        ctrl:         { bAcceptKey: true,  sConstant: '[HOLD]^'      , sMethod: 'Keys' },
-        shift:        { bAcceptKey: true,  sConstant: '[HOLD]!'      , sMethod: 'Keys' },
-        alt:          { bAcceptKey: true,  sConstant: '[HOLD]~'      , sMethod: 'Keys' },
+        ctrl:         { bAcceptKey: true,  sConstant: '[Hold]^'      , sMethod: 'Keys' },
+        shift:        { bAcceptKey: true,  sConstant: '[Hold]!'      , sMethod: 'Keys' },
+        alt:          { bAcceptKey: true,  sConstant: '[Hold]~'      , sMethod: 'Keys' },
         appsKey:      { bAcceptKey: false, sConstant: '[Apps]'       , sMethod: 'Keys' },
         bs:           { bAcceptKey: false, sConstant: '[BS]'         , sMethod: 'Keys' },
         backspace :   { bAcceptKey: false, sConstant: '[BS]'         , sMethod: 'Keys' },
@@ -269,6 +468,9 @@ function Keyboard() {
 
         // Custom Functions
         wait:         { bAcceptKey: false, sConstant: ''             , sMethod: '.Delay'                         },
+        refresh:      { bAcceptKey: false, sConstant: ''             , sMethod: '.Refresh'                       },
+        autorefresh:  { bAcceptKey: false, sConstant: ''             , sMethod: '.AutoRefresh'                   },
+        function:     { bAcceptKey: false, sConstant: ''             , sMethod: '.Function'                      },
     };
 
     // Settings for Fx Keys
@@ -291,6 +493,7 @@ function Keyboard() {
         self[sInput] = (oInputSetting.bAcceptKey) ?
             function ($sKey, $nDelayMs = null, ...aRest) {
                 return self.addRecord(
+                    sInput,
                     oInputSetting.sMethod,
                     `${oInputSetting.sConstant}${$sKey}`,
                     $nDelayMs,
@@ -300,6 +503,7 @@ function Keyboard() {
             } :
             function ($nDelayMs = null, ...aRest) {
                 return self.addRecord(
+                    sInput,
                     oInputSetting.sMethod,
                     `${oInputSetting.sConstant}`,
                     $nDelayMs,
@@ -308,6 +512,9 @@ function Keyboard() {
                 );
             };
     }
+
+    // Set default Timeout to fix Options after a crash
+    Options.Run.Timeout = 10000;
 
     return self;
 }
