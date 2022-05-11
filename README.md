@@ -1,9 +1,47 @@
 # TestComplete - Keyboard Interface
 
+> An interface to perform Keyboard (and some Mouse) actions in an easier way.
+
+* **Version** : ``v0.6.1``
+* **Script** : ``./node_modules/@testcomplete/keyboard/Keyboard.js``
+* **Dependencies** :
+    * none
+
 
 ## Summary
 
 [](BeginSummary)
+* [Summary](#summary)
+* [Keyboard Setup for TestComplete](#keyboard%20setup%20for%20testcomplete)
+* [Get Started](#get%20started)
+* [Detailed Documentation](#detailed%20documentation)
+    * [Method ``on()``](#method%20%60%60on()%60%60)
+    * [Method ``keys()``](#method%20%60%60keys()%60%60)
+    * [method ``run()``](#method%20%60%60run()%60%60)
+    * [method ``send()``](#method%20%60%60send()%60%60)
+    * [Method ``delay()``](#method%20%60%60delay()%60%60)
+    * [Method ``wait()``](#method%20%60%60wait()%60%60)
+    * [Method ``refresh()``](#method%20%60%60refresh()%60%60)
+    * [Method ``autorefresh()``](#method%20%60%60autorefresh()%60%60)
+    * [Method ``keysautoclear()``](#method%20%60%60keysautoclear()%60%60)
+    * [Method ``setFocus()``](#method%20%60%60setfocus()%60%60)
+    * [Method ``function()``](#method%20%60%60function()%60%60)
+    * [Method ``get()``](#method%20%60%60get()%60%60)
+* [Cheat Sheet ``Keyboard``](#cheat%20sheet%20%60%60keyboard%60%60)
+    * [Top of Methods](#top%20of%20methods)
+        * [Method ``on()``](#method%20%60%60on()%60%60)
+        * [Method ``keys()``](#method%20%60%60keys()%60%60)
+        * [method ``run()``](#method%20%60%60run()%60%60)
+        * [method ``send()``](#method%20%60%60send()%60%60)
+        * [Method ``delay()``](#method%20%60%60delay()%60%60)
+        * [Method ``wait()``](#method%20%60%60wait()%60%60)
+        * [Method ``refresh()``](#method%20%60%60refresh()%60%60)
+        * [Method ``autorefresh()``](#method%20%60%60autorefresh()%60%60)
+        * [Method ``keysautoclear()``](#method%20%60%60keysautoclear()%60%60)
+        * [Method ``setFocus()``](#method%20%60%60setfocus()%60%60)
+        * [Method ``function()``](#method%20%60%60function()%60%60)
+        * [Method ``get()``](#method%20%60%60get()%60%60)
+* [List of all methods](#list%20of%20all%20methods)
 [](EndSummary)
 
 
@@ -18,29 +56,13 @@ if you have **nodejs** installed on your computer.
 npm install @testcomplete/keyboard
 ````
 
-**npm** installs the package with it dependencies locally in the folder
-where you type the command.
+Please confer to this documentation to add script in TestComplete :
 
-I advise to create a dedicated folder for your scripts libraries (Lib & Functions)
+Script List for the setup :
 
-![NPM Install Library](.x/docs/img/npm_install.png)
+* ``./node_modules/@testcomplete/keyboard/Keyboard.js``
 
-In **TestComplete**, you will have to add the following file
-to your project to be able **require** it in your scripts :
-
-* [Package] : ``./node_modules/@testcomplete/excelhandler/Keyboard.js``
-
-![Add existing script in TestComplete](.x/docs/img/tc_add_script.png)
-
-![Add existing script in TestComplete](.x/docs/img/tc_add_script_select_script.png)
-
-![Add existing script in TestComplete](.x/docs/img/tc_add_script_added.png)
-
-Once Files (Library and its dependencies) are added in TestComplete,
-now you are able to required library ExcelHandler in any scripts.
-
-![Requiring ExcelHandler](.x/docs/img/tc_required_excelhandler.png)
-
+[@testcomplete/testcompletelibrarysetup](https://www.npmjs.com/package/@testcomplete/testcompletelibrarysetup)
 
 
 
@@ -60,9 +82,9 @@ Please find below the exhaustive list of generated methods for keys
 
 | Method | Combining | Keys | │ | Method | Combining | Keys |
 |---|:---:|:---:|:---:|---|:---:|:---:|
-| ctrl | False | CTRL | │ | win | False | Windows |
-| shift | False | SHIFT | │ | pause | False | Pause |
-| alt | False | ALT | │ | pageUp | False | Page Up |
+| ctrl | True | CTRL | │ | win | False | Windows |
+| shift | True | SHIFT | │ | pause | False | Pause |
+| alt | True | ALT | │ | pageUp | False | Page Up |
 | appsKey | False | Apps Key | │ | pageDown | False | Page Down |
 | bs | False | Backspace | │ | prtsc | False | Print Screen |
 | backspace | False | Backspace | │ | print | False | Print Screen |
@@ -94,26 +116,32 @@ Please find below the exhaustive list of generated methods for keys
 | f8 | False | Function Key F8 | │ | f9 | False | Function Key F9 |
 | f10 | False | Function Key F10 | │ | f11 | False | Function Key F11 |
 | f12 | False | Function Key F12 | │ |  |  |  |
+| keys | True | TestComplete Keys() Method | │ | click | False | Mouse Click |
+| clickM | False | Mouse Middle Click | │ | clickR | False | Mouse Right Click |
+| dblClick | False | Mouse Double Click | │ | dblClickM | False | Mouse Double Middle Click |
+| dblclickR | False | Mouse Double Right Click | │ | drag | False | Mouse Drag |
+| dragM | False | Mouse Middle Button Drag | │ | dragR | False | Mouse Right Button Drag |
+| hoverMouse | False | SAPLOGON Specific Mouse Hover | │ | mouseWheel | False | SAPLOGON Specific Scrolling |
+| press | False | SAPLOGON Specific Press event | │ | setFocus | False | SAPLOGON Specific set focus on field |
+| wait | False | Wait specified delay | │ | refresh | False | Refresh NameMapped object |
+| autoRefresh | False | Enable/Disable autorefresh | │ | function | False | Executes provided function |
 
 All here before methods mentioned can be called from loaded ``Keyboard`` interface
 with following statement and main definition is (methods are case sensitive) :
 
 > Keyboard <method>( [ String $sKey, [ Number $nDelayMs ] ] | [ Number $nDelayMs ] )
 
+Before calling keys methods, you have at least call the method ``.on()``
+to set TestComplete NameMapping Object which will receive inputs.
+
+All keys methods called next to method ``.on()`` will refer to previously 
+object set. You can change the TestComplete NM Object by calling method
+``.on()`` at any time. 
+
 ````js
 const Keyboard = require('Keyboard');
 
-let kb = Keyboard.ctrl('f').enter().escape().right();
-````
-
-Once you set your sequence, you have to specified which
-**TestComplete** object will have to execute recorded sequence
-with its methods ``Keys()``.
-
-For instance for the Web Browser :
-
-````js
-kb.on(Aliases.browser.BrowserWindow);
+let kb = Keyboard.on(Aliases.browser.BrowserWindow).ctrl('f').enter().escape().right();
 ````
 
 All methods have a last optional argument ``$nDelayMs`` to set the
@@ -129,6 +157,10 @@ Keyboard.enter(2000);       // Press Enter & Wait 2000ms
 ````
 
 From this point, you can run sequence thanks to method ``run()`` (Alias `send()`);
+
+
+
+
 
 
 ## Detailed Documentation
@@ -155,7 +187,7 @@ accept any sequence which respect the following documentation :
 
 
 ````js
-Keyboard.keys('[HOLD]^f[Release]MySearchWord').run();
+Keyboard.keys('[Hold]^f[Release]MySearchWord').run();
 // Will produce the same result as :
 Keyboard.ctrl('f').keys('MySearchWord').run();
 ````
