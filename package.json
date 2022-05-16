@@ -1,6 +1,6 @@
 {
   "name": "@testcomplete/keyboard",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "An interface to perform Keyboard (and some Mouse) actions in an easier way",
   "main": "Keyboard.js",
   "scripts": {
