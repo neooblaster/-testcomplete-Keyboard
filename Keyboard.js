@@ -1,5 +1,5 @@
 ﻿/**
- * Version v0.6.1
+ * Version v0.6.2
  *
  * @Author: Nicolas DUPRE (VISEO)
  *

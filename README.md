@@ -2,7 +2,8 @@
 
 > An interface to perform Keyboard (and some Mouse) actions in an easier way.
 
-* **Version** : ``v0.6.1``
+* **Version** : ``v0.6.2``
+* **Compatibility** : **TestComplete** only
 * **Script** : ``./node_modules/@testcomplete/keyboard/Keyboard.js``
 * **Dependencies** :
     * none
@@ -12,36 +13,36 @@
 
 [](BeginSummary)
 * [Summary](#summary)
-* [Keyboard Setup for TestComplete](#keyboard%20setup%20for%20testcomplete)
-* [Get Started](#get%20started)
-* [Detailed Documentation](#detailed%20documentation)
-    * [Method ``on()``](#method%20%60%60on()%60%60)
-    * [Method ``keys()``](#method%20%60%60keys()%60%60)
-    * [method ``run()``](#method%20%60%60run()%60%60)
-    * [method ``send()``](#method%20%60%60send()%60%60)
-    * [Method ``delay()``](#method%20%60%60delay()%60%60)
-    * [Method ``wait()``](#method%20%60%60wait()%60%60)
-    * [Method ``refresh()``](#method%20%60%60refresh()%60%60)
-    * [Method ``autorefresh()``](#method%20%60%60autorefresh()%60%60)
-    * [Method ``keysautoclear()``](#method%20%60%60keysautoclear()%60%60)
-    * [Method ``setFocus()``](#method%20%60%60setfocus()%60%60)
-    * [Method ``function()``](#method%20%60%60function()%60%60)
-    * [Method ``get()``](#method%20%60%60get()%60%60)
-* [Cheat Sheet ``Keyboard``](#cheat%20sheet%20%60%60keyboard%60%60)
-    * [Top of Methods](#top%20of%20methods)
-        * [Method ``on()``](#method%20%60%60on()%60%60)
-        * [Method ``keys()``](#method%20%60%60keys()%60%60)
-        * [method ``run()``](#method%20%60%60run()%60%60)
-        * [method ``send()``](#method%20%60%60send()%60%60)
-        * [Method ``delay()``](#method%20%60%60delay()%60%60)
-        * [Method ``wait()``](#method%20%60%60wait()%60%60)
-        * [Method ``refresh()``](#method%20%60%60refresh()%60%60)
-        * [Method ``autorefresh()``](#method%20%60%60autorefresh()%60%60)
-        * [Method ``keysautoclear()``](#method%20%60%60keysautoclear()%60%60)
-        * [Method ``setFocus()``](#method%20%60%60setfocus()%60%60)
-        * [Method ``function()``](#method%20%60%60function()%60%60)
-        * [Method ``get()``](#method%20%60%60get()%60%60)
-* [List of all methods](#list%20of%20all%20methods)
+* [Keyboard Setup for TestComplete](#keyboard-setup-for-testcomplete)
+* [Get Started](#get-started)
+* [Detailed Documentation](#detailed-documentation)
+    * [Method ``on()``](#method-on)
+    * [Method ``keys()``](#method-keys)
+    * [method ``run()``](#method-run)
+    * [method ``send()``](#method-send)
+    * [Method ``delay()``](#method-delay)
+    * [Method ``wait()``](#method-wait)
+    * [Method ``refresh()``](#method-refresh)
+    * [Method ``autorefresh()``](#method-autorefresh)
+    * [Method ``keysautoclear()``](#method-keysautoclear)
+    * [Method ``setFocus()``](#method-setfocus)
+    * [Method ``function()``](#method-function)
+    * [Method ``get()``](#method-get)
+* [Cheat Sheet ``Keyboard``](#cheat-sheet-keyboard)
+    * [Top of Methods](#top-of-methods)
+        * [Method ``on()``](#method-on)
+        * [Method ``keys()``](#method-keys)
+        * [method ``run()``](#method-run)
+        * [method ``send()``](#method-send)
+        * [Method ``delay()``](#method-delay)
+        * [Method ``wait()``](#method-wait)
+        * [Method ``refresh()``](#method-refresh)
+        * [Method ``autorefresh()``](#method-autorefresh)
+        * [Method ``keysautoclear()``](#method-keysautoclear)
+        * [Method ``setFocus()``](#method-setfocus)
+        * [Method ``function()``](#method-function)
+        * [Method ``get()``](#method-get)
+* [List of all methods](#list-of-all-methods)
 [](EndSummary)
 
 
@@ -62,7 +63,7 @@ Script List for the setup :
 
 * ``./node_modules/@testcomplete/keyboard/Keyboard.js``
 
-[TestComplete Library Setup](https://gitlab.viseo.com/testcomplete/documentations/testcompletelibrarysetup)
+[@testcomplete/testcompletelibrarysetup](https://www.npmjs.com/package/@testcomplete/testcompletelibrarysetup)
 
 
 

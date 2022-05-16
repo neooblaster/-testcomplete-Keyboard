@@ -1,17 +1,28 @@
 {
-    "name": "@testcomplete/keyboard",
-    "version": "0.6.1",
-    "description": "An interface to perform Keyboard (and some Mouse) actions in an easier way",
-    "main": "Keyboard.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [
-        "TestComplete",
-        "Automation",
-        "Keyboard",
-        "Interface"
-    ],
-    "author": "Nicolas DUPRE",
-    "license": "ISC"
+  "name": "@testcomplete/keyboard",
+  "version": "0.6.1",
+  "description": "An interface to perform Keyboard (and some Mouse) actions in an easier way",
+  "main": "Keyboard.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "TestComplete",
+    "Automation",
+    "Keyboard",
+    "Interface"
+  ],
+  "author": "Nicolas DUPRE",
+  "license": "ISC",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/neooblaster/-testcomplete-Keyboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neooblaster/-testcomplete-Keyboard/issues"
+  },
+  "homepage": "https://github.com/neooblaster/-testcomplete-Keyboard#readme"
 }
