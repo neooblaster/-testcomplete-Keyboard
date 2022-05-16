@@ -63,7 +63,7 @@ Script List for the setup :
 
 * ``./node_modules/@testcomplete/keyboard/Keyboard.js``
 
-[TestComplete Library Setup](https://gitlab.viseo.com/testcomplete/documentations/testcompletelibrarysetup)
+[@testcomplete/testcompletelibrarysetup](https://www.npmjs.com/package/@testcomplete/testcompletelibrarysetup)
 
 
 
